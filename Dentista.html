@@ -1,0 +1,783 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Generador Landing — Clínica Dental (v2.0)</title>
+<style>
+:root{
+  --accent: #0b63d6;
+  --muted: #6b7280;
+  --bg: #f6f8ff;
+  --card: #fff;
+  --text: #111827;
+  --radius: 12px;
+  --shadow: 0 6px 20px rgba(20,30,60,0.06);
+  --success: #25D366;
+  --danger: #ef4444;
+  --max-width: 1200px;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  background:var(--bg);
+  color:var(--text);
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  padding-bottom:40px;
+}
+
+/* Header */
+.header{
+  display:flex; gap:16px; align-items:center; padding:14px 20px;
+  background:#fff; box-shadow:0 2px 8px rgba(15,23,42,0.04);
+  position:sticky; top:0; z-index:30;
+}
+.logo-mini{ width:48px;height:48px;border-radius:10px;background:#eef4ff; display:flex;align-items:center;justify-content:center;font-weight:800;color:var(--accent); }
+
+/* Layout */
+.container{ max-width:var(--max-width); margin:18px auto; padding:0 18px; display:grid; grid-template-columns:420px 1fr; gap:20px; align-items:start; }
+.panel{ background:var(--card); padding:16px; border-radius:var(--radius); box-shadow:var(--shadow); max-height:78vh; overflow:auto }
+.panel h2{ margin:6px 0 12px 0; color:var(--accent) }
+label{ font-size:13px; color:var(--muted); display:block; margin-top:10px }
+input[type="text"], input[type="color"], textarea, input[type="file"], select{
+  width:100%; padding:10px; border-radius:8px; border:1px solid #e6eefb; background:#fff; margin-top:6px;
+  font-size:14px;
+}
+textarea{ min-height:72px; resize:vertical }
+.row{ display:flex; gap:10px }
+.btn{ background:var(--accent); color:white; padding:10px 12px; border-radius:8px; border:0; cursor:pointer; font-weight:700 }
+.btn.secondary{ background:#f1f5fb; color:var(--text) }
+.small{ font-size:12px; color:var(--muted) }
+.service-editor{ border:1px dashed #e6eef8; padding:10px; border-radius:8px; background:#fbfdff; margin-top:10px }
+.services-list{ margin-top:12px; display:flex; flex-direction:column; gap:8px }
+.service-row{ display:flex; justify-content:space-between; align-items:center; padding:8px; border-radius:8px; background:#fff; border:1px solid #eef6ff }
+.service-row .meta{ color:var(--muted); font-size:13px }
+
+/* Preview */
+.preview { padding:18px; }
+.preview-frame{ background:#fff; border-radius:12px; padding:22px; box-shadow:0 6px 18px rgba(20,30,50,0.06); min-height:60vh; overflow:auto }
+.service-card{ display:flex; gap:12px; align-items:flex-start; border-radius:10px; padding:14px; border:1px solid #eef6ff; background:#fff; margin-bottom:12px }
+.service-card .icon{ width:64px; height:64px; border-radius:8px; background:#f3f6fb; display:flex; align-items:center; justify-content:center; font-size:26px; }
+.service-card .info{ flex:1 }
+.service-card .name{ font-weight:800; color:var(--text) }
+.service-card .price{ color:var(--accent); font-weight:800; margin-top:6px }
+.service-actions{ display:flex; gap:8px; margin-top:10px }
+.service-actions a, .service-actions button{ padding:10px 12px; border-radius:8px; font-weight:800; color:#fff; text-decoration:none; border:0; cursor:pointer }
+.btn-wsp{ background:var(--success) }
+.btn-agenda{ background:var(--accent) }
+
+/* Gallery and map */
+.gallery-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:10px; margin-top:12px }
+.gallery-grid img{ width:100%; border-radius:8px; object-fit:cover; border:1px solid #e6eef8 }
+.before-after{ display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:12px }
+.col{ background:#fff; padding:10px; border-radius:8px; border:1px solid #eef6ff }
+.map-wrap{ margin-top:14px; border-radius:10px; overflow:hidden; border:1px solid #e6eef8; background:#fff }
+
+/* Responsive */
+@media (max-width:980px){
+  .container{ grid-template-columns:1fr; padding:12px }
+  .before-after{ grid-template-columns:1fr }
+}
+
+/* tiny helpers */
+.kv{ font-size:13px; color:var(--muted) }
+.row-center{ display:flex; align-items:center; gap:8px }
+.badge{ background:#f1f5fb;padding:6px 8px;border-radius:6px;font-weight:700;color:var(--muted);font-size:13px }
+.disabled{ opacity:0.5; pointer-events:none }
+.footer-note{ text-align:center; color:var(--muted); margin-top:10px; font-size:13px }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo-mini">D</div>
+  <div>
+    <div style="font-weight:800">Generador Landing — Clínica Dental (v2.0)</div>
+    <div class="small">Servicios editables, galería emparejada, mapa sin API, exportación limpia.</div>
+  </div>
+</div>
+
+<div class="container">
+  <!-- PANEL IZQUIERDO -->
+  <section class="panel" aria-label="Controles">
+    <h2>Datos de la clínica</h2>
+    <label>Nombre de la clínica</label>
+    <input id="clinicName" type="text" value="Clínica Dental Sonrisas">
+
+    <label>Descripción breve</label>
+    <input id="clinicTag" type="text" value="Sonrisas sanas y estéticas con tecnología moderna">
+
+    <label>Teléfono (para Llamar)</label>
+    <input id="phone" type="text" placeholder="+521XXXXXXXXXXX">
+
+    <label>WhatsApp (solo dígitos, ej. 521XXXXXXXXXXX)</label>
+    <input id="whatsapp" type="text" placeholder="521XXXXXXXXXXX">
+
+    <label>Dirección (se mostrará en contacto)</label>
+    <input id="address" type="text" placeholder="Av. Siempre Viva 123, CDMX">
+
+    <label>Color principal</label>
+    <input id="accent" type="color" value="#0b63d6">
+
+    <label>Logo (opcional)</label>
+    <input id="logoFile" type="file" accept="image/*">
+
+    <label>Hero / Imagen principal (URL)</label>
+    <input id="heroUrl" type="text" placeholder="https://...">
+
+    <h2>Servicios</h2>
+    <div class="service-editor" aria-live="polite">
+      <input id="svcId" type="hidden">
+      <div style="display:flex;gap:8px">
+        <input id="svcName" type="text" placeholder="Nombre del servicio (ej. Limpieza dental)">
+        <input id="svcPrice" type="text" placeholder="Precio (ej. $500)" style="width:140px">
+      </div>
+      <textarea id="svcDesc" placeholder="Descripción breve (ej. Incluye pulido y revisión)"></textarea>
+      <input id="svcIcon" type="text" placeholder="Icono (emoji) o URL imagen (opcional)">
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <button class="btn" id="saveSvc">Guardar servicio</button>
+        <button class="btn secondary" id="resetSvc">Limpiar</button>
+      </div>
+      <div class="small" style="margin-top:8px">Haz click en "Editar" sobre un servicio para modificarlo sin eliminar inmediatamente.</div>
+    </div>
+
+    <div class="services-list" id="servicesList" aria-live="polite"></div>
+
+    <h2 style="margin-top:14px">Galería Antes / Después</h2>
+    <div class="small">Pega URLs (una por línea) o sube imágenes (multi-file). Se emparejarán por índice (índice 0 antes ↔ índice 0 después).</div>
+
+    <label>URLs - Antes (una por línea)</label>
+    <textarea id="beforeUrls" placeholder="https://..."></textarea>
+    <label>URLs - Después (una por línea)</label>
+    <textarea id="afterUrls" placeholder="https://..."></textarea>
+
+    <label>Subir imágenes (Antes) — puedes seleccionar varios</label>
+    <input id="beforeFiles" type="file" accept="image/*" multiple>
+
+    <label>Subir imágenes (Después) — puedes seleccionar varios</label>
+    <input id="afterFiles" type="file" accept="image/*" multiple>
+
+    <h2 style="margin-top:12px">Cómo llegar (Google Maps)</h2>
+    <div class="small">Pega el enlace normal de Google Maps (maps.app, maps/place, maps?q=...). Si la URL no puede convertirse a embed, se mostrará botón para abrir en nueva pestaña.</div>
+    <input id="mapsUrl" type="text" placeholder="https://maps.app.goo.gl/... o https://www.google.com/maps/...">
+
+    <h2 style="margin-top:12px">Secciones adicionales</h2>
+    <textarea id="extraSection" placeholder="Promos, horario, etc."></textarea>
+
+    <div style="display:flex;gap:8px;margin-top:12px">
+      <button class="btn" id="generate">Generar / Actualizar vista previa</button>
+      <button class="btn secondary" id="download">Descargar .html</button>
+    </div>
+
+    <div class="footer-note">Recuerda ingresar el número de WhatsApp para activar los botones de contacto por servicio.</div>
+  </section>
+
+  <!-- PREVIEW -->
+  <section class="panel preview" aria-label="Vista previa">
+    <div class="preview-frame" id="previewFrame" role="region" aria-live="polite">
+      <!-- preview content injected here -->
+    </div>
+  </section>
+</div>
+
+<script>
+/* ============================
+   Utilidades y estado inicial
+   ============================ */
+const $ = id => document.getElementById(id);
+const uid = () => 'id-'+Math.random().toString(36).slice(2,9);
+const escapeHtml = s => (s||'').toString()
+  .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+
+/* Debounce util */
+function debounce(fn, ms=150){
+  let t;
+  return function(...args){
+    clearTimeout(t);
+    t = setTimeout(()=>fn.apply(this,args), ms);
+  }
+}
+
+/* Estado */
+const state = {
+  clinicName: $('clinicName').value,
+  clinicTag: $('clinicTag').value,
+  phone: $('phone').value,
+  whatsapp: $('whatsapp').value.replace(/\D/g,''),
+  address: $('address').value,
+  accent: $('accent').value,
+  logoData: null,
+  heroUrl: $('heroUrl').value,
+  services: [], // {id,name,price,desc,icon}
+  galleryPairs: [], // [{before:src|null, after:src|null}, ...]
+  mapsUrl: $('mapsUrl').value,
+  extra: $('extraSection').value
+};
+
+/* Small safe setter to sync inputs -> state */
+function syncFromInputs(){
+  state.clinicName = $('clinicName').value;
+  state.clinicTag = $('clinicTag').value;
+  state.phone = $('phone').value.trim();
+  state.whatsapp = $('whatsapp').value.replace(/\D/g,'').trim();
+  state.address = $('address').value.trim();
+  state.accent = $('accent').value;
+  state.heroUrl = $('heroUrl').value.trim();
+  state.mapsUrl = $('mapsUrl').value.trim();
+  state.extra = $('extraSection').value;
+}
+
+/* ================
+   Logo handling
+   ================ */
+$('logoFile').addEventListener('change', e=>{
+  const f = e.target.files[0];
+  if(!f) return;
+  const r = new FileReader();
+  r.onload = ev=>{
+    state.logoData = ev.target.result;
+    debouncedRender();
+  };
+  r.readAsDataURL(f);
+});
+
+/* ======================
+   Services (add / edit)
+   ====================== */
+$('saveSvc').addEventListener('click', ()=> {
+  const id = $('svcId').value || null;
+  const name = $('svcName').value.trim();
+  if(!name){ alert('Escribe el nombre del servicio'); return; }
+  const serviceObj = {
+    id: id || uid(),
+    name,
+    price: $('svcPrice').value.trim(),
+    desc: $('svcDesc').value.trim(),
+    icon: $('svcIcon').value.trim()
+  };
+  if(id){
+    // edit existing
+    const idx = state.services.findIndex(s=>s.id === id);
+    if(idx !== -1) state.services[idx] = serviceObj;
+  }else{
+    // new
+    state.services.push(serviceObj);
+  }
+  resetSvcForm();
+  renderServicesEditor();
+  debouncedRender();
+});
+
+$('resetSvc').addEventListener('click', resetSvcForm);
+
+function resetSvcForm(){
+  $('svcId').value = '';
+  $('svcName').value = '';
+  $('svcPrice').value = '';
+  $('svcDesc').value = '';
+  $('svcIcon').value = '';
+}
+
+/* Render services list */
+function renderServicesEditor(){
+  const wrap = $('servicesList');
+  wrap.innerHTML = '';
+  if(state.services.length === 0){
+    wrap.innerHTML = `<div class="small" style="color:#999">No hay servicios añadidos</div>`;
+    return;
+  }
+  state.services.forEach((s, idx)=>{
+    const el = document.createElement('div');
+    el.className = 'service-row';
+    el.innerHTML = `
+      <div>
+        <div style="font-weight:700">${escapeHtml(s.name)}</div>
+        <div class="meta">${escapeHtml(s.price)} • ${escapeHtml(s.desc)}</div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button class="btn secondary edit" data-id="${s.id}">Editar</button>
+        <button class="btn secondary del" data-id="${s.id}">Eliminar</button>
+      </div>
+    `;
+    el.querySelector('.edit').onclick = ()=>{
+      $('svcId').value = s.id;
+      $('svcName').value = s.name;
+      $('svcPrice').value = s.price;
+      $('svcDesc').value = s.desc;
+      $('svcIcon').value = s.icon;
+      window.scrollTo({top:0, behavior:'smooth'});
+    };
+    el.querySelector('.del').onclick = ()=>{
+      if(!confirm('¿Eliminar servicio?')) return;
+      state.services = state.services.filter(x=> x.id !== s.id);
+      renderServicesEditor();
+      debouncedRender();
+    };
+    wrap.appendChild(el);
+  });
+}
+
+/* ======================
+   Gallery management
+   - Emparejamos por índice:
+     pair[i].before <-> pair[i].after
+   - Soportamos data: URLs (uploads) + http(s) URLs (textareas)
+   ====================== */
+
+function parseTextareaLines(txt){
+  if(!txt) return [];
+  return txt.split('\n').map(l => l.trim()).filter(Boolean);
+}
+
+/* Update gallery pairs from textareas and file-uploaded images */
+function updateGalleryPairsFromInputs(){
+  const beforeUrls = parseTextareaLines($('beforeUrls').value);
+  const afterUrls = parseTextareaLines($('afterUrls').value);
+
+  // extract existing uploaded data images from state.galleryPairs (data:)
+  const existingBeforeData = [];
+  const existingAfterData = [];
+  state.galleryPairs.forEach(p=>{
+    if(p.before && p.before.startsWith('data:')) existingBeforeData.push(p.before);
+    if(p.after && p.after.startsWith('data:')) existingAfterData.push(p.after);
+  });
+
+  // build lists: uploaded data first (persist), then text URLs
+  const beforeList = existingBeforeData.concat(beforeUrls);
+  const afterList  = existingAfterData.concat(afterUrls);
+
+  // pair by index
+  const maxLen = Math.max(beforeList.length, afterList.length);
+  const pairs = [];
+  for(let i=0;i<maxLen;i++){
+    pairs.push({
+      id: uid(),
+      before: beforeList[i] || null,
+      after: afterList[i] || null
+    });
+  }
+  state.galleryPairs = pairs;
+}
+
+/* Handle file uploads for before/after */
+$('beforeFiles').addEventListener('change', e=>{
+  const files = Array.from(e.target.files || []);
+  if(files.length === 0) return;
+  let loaded = 0;
+  files.forEach((f, i)=>{
+    const r = new FileReader();
+    r.onload = ev=>{
+      // append as data URL to existing before list
+      // Keep previous uploaded before items at front
+      const existingBefore = state.galleryPairs.map(p=>p.before).filter(Boolean).filter(x=>x.startsWith('data:'));
+      existingBefore.push(ev.target.result);
+      // reconstruct after list (keep existing after entries)
+      const existingAfter = state.galleryPairs.map(p=>p.after).filter(Boolean);
+      const maxLen = Math.max(existingBefore.length, existingAfter.length);
+      const pairs = [];
+      for(let j=0;j<maxLen;j++){
+        pairs.push({ id: uid(), before: existingBefore[j] || null, after: existingAfter[j] || null });
+      }
+      state.galleryPairs = pairs;
+      debouncedRender();
+      loaded++;
+    };
+    r.readAsDataURL(f);
+  });
+});
+
+$('afterFiles').addEventListener('change', e=>{
+  const files = Array.from(e.target.files || []);
+  if(files.length === 0) return;
+  files.forEach((f)=>{
+    const r = new FileReader();
+    r.onload = ev=>{
+      const existingAfter = state.galleryPairs.map(p=>p.after).filter(Boolean).filter(x=>x.startsWith('data:'));
+      existingAfter.push(ev.target.result);
+      const existingBefore = state.galleryPairs.map(p=>p.before).filter(Boolean);
+      const maxLen = Math.max(existingBefore.length, existingAfter.length);
+      const pairs = [];
+      for(let j=0;j<maxLen;j++){
+        pairs.push({ id: uid(), before: existingBefore[j] || null, after: existingAfter[j] || null });
+      }
+      state.galleryPairs = pairs;
+      debouncedRender();
+    };
+    r.readAsDataURL(f);
+  });
+});
+
+/* When user edits textareas, rebuild pairs (data: images preserved) */
+$('beforeUrls').addEventListener('input', debounce(()=>{
+  updateGalleryPairsFromInputs();
+  debouncedRender();
+}, 200));
+$('afterUrls').addEventListener('input', debounce(()=>{
+  updateGalleryPairsFromInputs();
+  debouncedRender();
+}, 200));
+
+/* ======================
+   Map conversion (no API key)
+   - Try to extract q or place; if not possible, fallback to opening maps URL in new tab
+   - Use "output=embed" approach: https://www.google.com/maps?q=...&output=embed
+   ====================== */
+function convertToEmbedUrl(raw){
+  if(!raw) return null;
+  try{
+    const u = new URL(raw);
+    const hostname = u.hostname.toLowerCase();
+
+    // If it's already an embed, return it
+    if(u.pathname.includes('/maps/embed')) return raw;
+
+    // If has q= param
+    if(u.searchParams.has('q')){
+      const q = u.searchParams.get('q');
+      return `https://www.google.com/maps?q=${encodeURIComponent(q)}&output=embed`;
+    }
+
+    // If path includes /place/<place-name>
+    const placeMatch = u.pathname.match(/\/maps\/place\/([^\/?#]+)/i);
+    if(placeMatch){
+      const place = decodeURIComponent(placeMatch[1]);
+      return `https://www.google.com/maps?q=${encodeURIComponent(place)}&output=embed`;
+    }
+
+    // If hostname maps.app.goo.gl — it's a short redirect; we cannot resolve client-side reliably.
+    if(hostname.includes('maps.app.goo.gl')){
+      // fallback: open original URL in new tab instead of embed
+      return null;
+    }
+
+    // Otherwise, if the URL contains coordinates like @lat,long,z
+    const atMatch = raw.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
+    if(atMatch){
+      const lat = atMatch[1], lon = atMatch[2];
+      return `https://www.google.com/maps?q=${lat},${lon}&output=embed`;
+    }
+
+    // Last resort: try to use the whole URL as q
+    return `https://www.google.com/maps?q=${encodeURIComponent(raw)}&output=embed`;
+  } catch(e){
+    return null;
+  }
+}
+
+/* ======================
+   Build preview HTML
+   - Clean, safe, no script injection
+   ====================== */
+function buildPreviewHtmlForExport(localState){
+  // create services html
+  const wa = localState.whatsapp;
+  const servicesHtml = (localState.services || []).map(s=>{
+    const consultHref = wa ? `https://wa.me/${wa}?text=${encodeURIComponent('Hola, quiero información sobre: '+s.name)}` : '#';
+    const reserveHref = wa ? `https://wa.me/${wa}?text=${encodeURIComponent('Hola, quiero agendar una cita para: '+s.name)}` : '#';
+    const iconHtml = s.icon
+      ? (s.icon.startsWith("http") || s.icon.startsWith("data:")
+          ? `<img src="${escapeHtml(s.icon)}" style="width:64px;height:64px;object-fit:cover;border-radius:8px">`
+          : `<div style="font-size:28px">${escapeHtml(s.icon)}</div>`
+        )
+      : `<div style="width:64px;height:64px;border-radius:8px;background:#f3f6fb;display:flex;align-items:center;justify-content:center;color:#9aa9bf">${escapeHtml((s.name||'').slice(0,2))}</div>`;
+    return `
+      <article class="service-card" aria-label="${escapeHtml(s.name)}" style="margin-bottom:12px">
+        <div class="icon">${iconHtml}</div>
+        <div class="info">
+          <div class="name">${escapeHtml(s.name)}</div>
+          ${ s.price ? `<div class="price">${escapeHtml(s.price)}</div>` : '' }
+          ${ s.desc ? `<div style="margin-top:6px;color:#444">${escapeHtml(s.desc)}</div>` : '' }
+          <div class="service-actions" style="margin-top:10px">
+            <a class="btn-wsp" href="${consultHref}" target="_blank" rel="noopener noreferrer" style="padding:8px 10px;border-radius:8px;background:${localState.accent};color:#fff;text-decoration:none;display:inline-block;margin-right:6px">💬 Consultar</a>
+            <a class="btn-agenda" href="${reserveHref}" target="_blank" rel="noopener noreferrer" style="padding:8px 10px;border-radius:8px;background:${localState.accent};color:#fff;text-decoration:none;display:inline-block">📅 Reservar</a>
+          </div>
+        </div>
+      </article>
+    `;
+  }).join('\n');
+
+  // gallery html (paired)
+  let galleryHtml = '';
+  if((localState.galleryPairs || []).length){
+    const beforeCol = localState.galleryPairs.map(p => p.before ? `<img src="${escapeHtml(p.before)}" alt="antes" style="width:100%;border-radius:8px;margin-bottom:8px">` : '<div style="color:#999">—</div>').join('');
+    const afterCol  = localState.galleryPairs.map(p => p.after  ? `<img src="${escapeHtml(p.after)}"  alt="despues" style="width:100%;border-radius:8px;margin-bottom:8px">` : '<div style="color:#999">—</div>').join('');
+    galleryHtml = `
+      <section style="margin-top:18px">
+        <h3 style="color:${localState.accent}">Antes / Después</h3>
+        <div style="display:flex;gap:12px;flex-wrap:wrap">
+          <div style="flex:1;min-width:200px" class="col">
+            <h4 style="margin:6px 0">Antes</h4>
+            ${beforeCol}
+          </div>
+          <div style="flex:1;min-width:200px" class="col">
+            <h4 style="margin:6px 0">Después</h4>
+            ${afterCol}
+          </div>
+        </div>
+      </section>
+    `;
+  }
+
+  // map embed or fallback
+  const embed = convertToEmbedUrl(localState.mapsUrl);
+  const mapHtml = localState.mapsUrl ? (
+    embed ? `
+      <section style="margin-top:18px">
+        <h3 style="color:${localState.accent}">Cómo llegar</h3>
+        <div class="map-wrap" style="border-radius:8px;overflow:hidden;margin-top:8px">
+          <iframe src="${escapeHtml(embed)}" loading="lazy" style="width:100%;height:320px;border:0;display:block"></iframe>
+        </div>
+      </section>
+    ` : `
+      <section style="margin-top:18px">
+        <h3 style="color:${localState.accent}">Cómo llegar</h3>
+        <div style="margin-top:8px">
+          <a href="${escapeHtml(localState.mapsUrl)}" target="_blank" rel="noopener noreferrer" style="display:inline-block;padding:10px 12px;border-radius:8px;background:${localState.accent};color:#fff;text-decoration:none">Abrir en Google Maps</a>
+          <div class="small" style="margin-top:8px;color:#666">La URL proporcionada no puede convertirse a un iframe seguro; se abrirá en nueva pestaña.</div>
+        </div>
+      </section>
+    `
+  ) : '';
+
+  // logo
+  const logoHtml = localState.logoData
+    ? `<img src="${escapeHtml(localState.logoData)}" alt="logo" style="width:96px;height:96px;object-fit:cover;border-radius:12px">`
+    : `<div style="width:96px;height:96px;border-radius:12px;background:#eef4ff;display:flex;align-items:center;justify-content:center;font-weight:800;color:${localState.accent}">${escapeHtml((localState.clinicName||'').split(' ').filter(Boolean).map(w=>w[0]).slice(0,2).join(''))}</div>`;
+
+  // phone & whatsapp buttons
+  const phoneHtml = localState.phone ? `<a href="tel:${escapeHtml(localState.phone)}" style="background:${localState.accent};color:#fff;padding:10px 12px;border-radius:8px;text-decoration:none;font-weight:700">📞 Llamar</a>` : '';
+  const waHtml = localState.whatsapp ? `<a href="https://wa.me/${localState.whatsapp}" target="_blank" rel="noopener noreferrer" style="background:${'#25D366'};color:#fff;padding:10px 12px;border-radius:8px;text-decoration:none;font-weight:700">💬 WhatsApp</a>` : '';
+
+  const final = `
+    <div style="max-width:980px;margin:0 auto;font-family:Inter, Arial, sans-serif;color:#222">
+      <header style="display:flex;gap:18px;align-items:center">
+        <div>${logoHtml}</div>
+        <div>
+          <h1 style="margin:0;color:${localState.accent}">${escapeHtml(localState.clinicName)}</h1>
+          <div style="color:${localState.accent};font-weight:600">${escapeHtml(localState.clinicTag)}</div>
+          <div style="color:#666;margin-top:6px">${escapeHtml(localState.address||'')}</div>
+        </div>
+      </header>
+
+      ${ localState.heroUrl ? `<div style="margin-top:18px"><img src="${escapeHtml(localState.heroUrl)}" style="width:100%;border-radius:12px;object-fit:cover"></div>` : '' }
+
+      <section style="margin-top:18px">
+        <h2 style="color:${localState.accent}">Servicios</h2>
+        ${servicesHtml || '<div style="color:#999">No hay servicios añadidos</div>'}
+      </section>
+
+      ${galleryHtml}
+      ${mapHtml}
+
+      <section style="margin-top:18px">
+        <h2 style="color:${localState.accent}">Información</h2>
+        <div style="color:#444">${escapeHtml(localState.extra)}</div>
+
+        <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap">
+          ${phoneHtml} ${waHtml}
+        </div>
+      </section>
+
+      <footer style="margin-top:22px;color:#777;text-align:center">
+        © ${new Date().getFullYear()} ${escapeHtml(localState.clinicName)}
+      </footer>
+    </div>
+  `;
+  return final;
+}
+
+/* ======================
+   Render preview in app (not export)
+   - Uses the same logic but with classes from current CSS for nice look
+   ====================== */
+function renderPreview(){
+  syncFromInputs();
+  // update pairs from textareas if user edited them
+  updateGalleryPairsFromInputs();
+
+  const localState = {...state};
+
+  // build services html
+  const wa = localState.whatsapp;
+  const servicesHtml = (localState.services || []).map(s=>{
+    const consultHref = wa ? `https://wa.me/${wa}?text=${encodeURIComponent('Hola, quiero información sobre: '+s.name)}` : '#';
+    const reserveHref = wa ? `https://wa.me/${wa}?text=${encodeURIComponent('Hola, quiero agendar una cita para: '+s.name)}` : '#';
+    const iconHtml = s.icon
+      ? (s.icon.startsWith("http") || s.icon.startsWith("data:")
+          ? `<img src="${escapeHtml(s.icon)}" style="width:64px;height:64px;object-fit:cover;border-radius:8px">`
+          : `<div style="font-size:28px">${escapeHtml(s.icon)}</div>`
+        )
+      : `<div style="width:64px;height:64px;border-radius:8px;background:#f3f6fb;display:flex;align-items:center;justify-content:center;color:#9aa9bf">${escapeHtml((s.name||'').slice(0,2))}</div>`;
+    const disabledClass = wa ? '' : 'disabled';
+    return `
+      <article class="service-card" aria-label="${escapeHtml(s.name)}">
+        <div class="icon">${iconHtml}</div>
+        <div class="info">
+          <div class="name">${escapeHtml(s.name)}</div>
+          ${ s.price ? `<div class="price">${escapeHtml(s.price)}</div>` : '' }
+          ${ s.desc ? `<div class="service-desc" style="margin-top:6px">${escapeHtml(s.desc)}</div>` : '' }
+          <div class="service-actions">
+            <a class="btn-wsp ${disabledClass}" href="${wa ? consultHref : 'javascript:void(0)'}" target="_blank" rel="noopener noreferrer">💬 Consultar</a>
+            <a class="btn-agenda ${disabledClass}" href="${wa ? reserveHref : 'javascript:void(0)'}" target="_blank" rel="noopener noreferrer">📅 Reservar</a>
+          </div>
+        </div>
+      </article>`;
+  }).join('');
+
+  // gallery preview
+  let galleryHtml = '';
+  if((localState.galleryPairs || []).length){
+    const beforeCol = localState.galleryPairs.map(p => p.before ? `<img src="${escapeHtml(p.before)}" alt="antes">` : '<div style="color:#999">—</div>').join('');
+    const afterCol  = localState.galleryPairs.map(p => p.after ? `<img src="${escapeHtml(p.after)}" alt="despues">` : '<div style="color:#999">—</div>').join('');
+    galleryHtml = `
+      <section style="margin-top:18px">
+        <h3 style="color:${localState.accent}">Antes / Después</h3>
+        <div class="before-after">
+          <div class="col">
+            <h4 style="margin:6px 0">Antes</h4>
+            ${beforeCol}
+          </div>
+          <div class="col">
+            <h4 style="margin:6px 0">Después</h4>
+            ${afterCol}
+          </div>
+        </div>
+      </section>
+    `;
+  }
+
+  // map preview
+  const embed = convertToEmbedUrl(localState.mapsUrl);
+  const mapHtml = localState.mapsUrl ? (
+    embed ? `
+    <section style="margin-top:18px">
+      <h3 style="color:${localState.accent}">Cómo llegar</h3>
+      <div class="map-wrap">
+        <iframe src="${escapeHtml(embed)}" loading="lazy"></iframe>
+      </div>
+    </section>
+    ` : `
+    <section style="margin-top:18px">
+      <h3 style="color:${localState.accent}">Cómo llegar</h3>
+      <div style="margin-top:8px">
+        <a href="${escapeHtml(localState.mapsUrl)}" target="_blank" rel="noopener noreferrer" class="btn" style="background:${localState.accent}">Abrir en Google Maps</a>
+        <div class="small" style="margin-top:8px">La URL no pudo convertirse a iframe, se abrirá en nueva pestaña.</div>
+      </div>
+    </section>
+    `
+  ) : '';
+
+  const logoHtml = localState.logoData
+    ? `<img src="${escapeHtml(localState.logoData)}" alt="logo" style="width:96px;height:96px;object-fit:cover;border-radius:12px">`
+    : `<div style="width:96px;height:96px;border-radius:12px;background:#eef4ff;display:flex;align-items:center;justify-content:center;font-weight:800;color:${localState.accent}">${escapeHtml((localState.clinicName||'').split(' ').filter(Boolean).map(w=>w[0]).slice(0,2).join(''))}</div>`;
+
+  const phoneHtml = localState.phone ? `<a class="btn" href="tel:${escapeHtml(localState.phone)}" style="background:${localState.accent};color:#fff;padding:10px 12px;border-radius:8px;text-decoration:none;font-weight:700">📞 Llamar</a>` : '';
+  const waHtml = localState.whatsapp ? `<a class="btn-wsp" href="https://wa.me/${localState.whatsapp}" target="_blank" rel="noopener noreferrer" style="background:#25D366;color:#fff;padding:10px 12px;border-radius:8px;text-decoration:none;font-weight:700">💬 WhatsApp</a>` : '';
+
+  const html = `
+    <div style="max-width:980px;margin:0 auto">
+      <header style="display:flex;gap:18px;align-items:center">
+        <div>${logoHtml}</div>
+        <div>
+          <h1 style="margin:0;color:${localState.accent}">${escapeHtml(localState.clinicName)}</h1>
+          <div style="color:${localState.accent};font-weight:600">${escapeHtml(localState.clinicTag)}</div>
+          <div style="color:#666;margin-top:6px">${escapeHtml(localState.address||'')}</div>
+        </div>
+      </header>
+
+      ${ localState.heroUrl ? `<div style="margin-top:18px"><img src="${escapeHtml(localState.heroUrl)}" style="width:100%;border-radius:12px;object-fit:cover"></div>` : '' }
+
+      <section style="margin-top:18px">
+        <h2 style="color:${localState.accent}">Servicios</h2>
+        ${servicesHtml || '<div style="color:#999">No hay servicios añadidos</div>'}
+      </section>
+
+      ${galleryHtml}
+      ${mapHtml}
+
+      <section style="margin-top:18px">
+        <h2 style="color:${localState.accent}">Información</h2>
+        <div style="color:#444">${escapeHtml(localState.extra)}</div>
+
+        <div style="margin-top:12px;display:flex;gap:10px">
+          ${phoneHtml}
+          ${waHtml}
+        </div>
+      </section>
+
+      <footer style="margin-top:22px;color:#777;text-align:center">
+        © ${new Date().getFullYear()} ${escapeHtml(localState.clinicName)}
+      </footer>
+    </div>
+  `;
+  $('previewFrame').innerHTML = html;
+}
+
+/* debounce render */
+const debouncedRender = debounce(renderPreview, 120);
+
+/* Auto-update bindings (lightweight) */
+['clinicName','clinicTag','phone','whatsapp','address','accent','heroUrl','mapsUrl','extraSection'].forEach(id=>{
+  $(id).addEventListener('input', ()=> {
+    // keep state updated and render debounced
+    if(id === 'whatsapp'){
+      state.whatsapp = $('whatsapp').value.replace(/\D/g,'');
+    }
+    debouncedRender();
+  });
+});
+
+/* click generate */
+$('generate').addEventListener('click', ()=>{
+  updateGalleryPairsFromInputs();
+  renderServicesEditor();
+  renderPreview();
+});
+
+/* download final HTML */
+$('download').addEventListener('click', ()=>{
+  // ensure latest
+  syncFromInputs();
+  updateGalleryPairsFromInputs();
+  const exportState = {...state};
+  const bodyHtml = buildPreviewHtmlForExport(exportState);
+
+  // Build CSS for exported page (a minimal set to keep it looking good)
+  const exportCss = `
+    body{font-family:Inter,Arial,sans-serif;margin:0;padding:20px;background:#f6f8ff;color:#111}
+    h1,h2,h3,h4{margin:0}
+    img{max-width:100%;display:block}
+  `;
+
+  const finalHtml = `<!doctype html>
+  <html lang="es">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>${escapeHtml(exportState.clinicName)}</title>
+    <style>${exportCss}</style>
+  </head>
+  <body>
+    ${bodyHtml}
+  </body>
+  </html>`;
+
+  const blob = new Blob([finalHtml], {type:"text/html"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = (exportState.clinicName || "landing-dental").replace(/\s+/g,"_").toLowerCase() + ".html";
+  a.click();
+  setTimeout(()=> URL.revokeObjectURL(url), 2000);
+});
+
+/* Initial render */
+renderServicesEditor();
+renderPreview();
+
+</script>
+</body>
+</html>
